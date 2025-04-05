@@ -1,109 +1,260 @@
-import React from "react";
-import { motion } from "framer-motion";
+// app/dashboard/layout.tsx
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
+  Squares2X2Icon,
+  UserIcon,
   CalendarIcon,
-  UserGroupIcon,
-  ChatBubbleLeftRightIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ChevronRightIcon,
+  XMarkIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
-import Header from "@/components/Header";
 
-const CustomerDashboard: React.FC = () => {
+const navigation = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: Squares2X2Icon,
+  },
+  {
+    name: "Counselors",
+    href: "/dashboard/counselors",
+    icon: UserIcon,
+  },
+  {
+    name: "Sessions",
+    href: "/dashboard/sessions",
+    icon: CalendarIcon,
+    subItems: [
+      { name: "Upcoming", href: "/dashboard/sessions/upcoming" },
+      { name: "History", href: "/dashboard/sessions/history" },
+    ],
+  },
+  {
+    name: "Messages",
+    href: "/dashboard/messages",
+    icon: ChatBubbleOvalLeftEllipsisIcon,
+  },
+  {
+    name: "Analytics",
+    href: "/dashboard/analytics",
+    icon: ChartBarIcon,
+  },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: Cog6ToothIcon,
+  },
+];
+
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header userType="customer" />
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <header className="md:hidden flex items-center justify-between p-4 bg-purple-900 text-white">
+        <h1 className="text-xl font-bold">BetterWellness</h1>
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-lg hover:bg-purple-800"
+        >
+          {isSidebarOpen ? (
+            <XMarkIcon className="h-6 w-6" />
+          ) : (
+            <Bars3Icon className="h-6 w-6" />
+          )}
+        </button>
+      </header>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex-grow p-4 md:p-8"
-      >
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Upcoming Sessions */}
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="md:col-span-2 bg-white rounded-xl p-6 shadow-lg"
+      {/* Navigation Sidebar */}
+      <AnimatePresence>
+        {(isSidebarOpen || window.innerWidth >= 768) && (
+          <motion.nav
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "tween" }}
+            className="w-64 fixed md:relative h-full bg-purple-900 text-white flex flex-col z-50"
           >
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <CalendarIcon className="h-6 w-6 text-blue-600" />
-              Upcoming Sessions
-            </h2>
-            <div className="space-y-4">
-              {[1, 2, 3].map((item) => (
-                <motion.div
-                  key={item}
-                  whileHover={{ scale: 1.02 }}
-                  className="p-4 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">Session with Dr. Smith</h3>
-                      <p className="text-gray-600 text-sm">
-                        Tomorrow at 2:00 PM
-                      </p>
+            <div className="p-6">
+              <h1 className="text-2xl font-bold">BetterWellness</h1>
+              <p className="text-sm text-purple-200 mt-1">
+                Health & Wellness Platform
+              </p>
+            </div>
+
+            <div className="flex-1 px-3 space-y-1 overflow-y-auto">
+              {navigation.map((item) => (
+                <div key={item.name}>
+                  <motion.div whileHover={{ scale: 1.02 }}>
+                    <a
+                      href={item.href}
+                      onClick={() => {
+                        if (window.innerWidth < 768) setIsSidebarOpen(false);
+                      }}
+                      className={`flex items-center p-3 rounded-lg ${
+                        pathname === item.href
+                          ? "bg-purple-700 text-white"
+                          : "hover:bg-purple-800"
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5 mr-3" />
+                      <span className="hidden md:inline">{item.name}</span>
+                      {item.subItems && (
+                        <ChevronRightIcon
+                          className="h-4 w-4 ml-auto hidden md:inline"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setOpenSubMenu(
+                              openSubMenu === item.name ? null : item.name
+                            );
+                          }}
+                        />
+                      )}
+                    </a>
+                  </motion.div>
+
+                  {item.subItems && openSubMenu === item.name && (
+                    <div className="ml-8 space-y-1">
+                      {item.subItems.map((subItem) => (
+                        <a
+                          key={subItem.name}
+                          href={subItem.href}
+                          onClick={() => {
+                            if (window.innerWidth < 768)
+                              setIsSidebarOpen(false);
+                          }}
+                          className={`block p-2 text-sm rounded ${
+                            pathname === subItem.href
+                              ? "bg-purple-700"
+                              : "hover:bg-purple-800"
+                          }`}
+                        >
+                          {subItem.name}
+                        </a>
+                      ))}
                     </div>
-                    <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
-                      Join
-                    </button>
-                  </div>
-                </motion.div>
+                  )}
+                </div>
               ))}
             </div>
-          </motion.div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
-          {/* Quick Actions */}
-          <div className="space-y-6">
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <UserGroupIcon className="h-6 w-6 text-blue-600" />
-                Find Counsellors
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Browse our network of qualified professionals
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-              >
-                Browse
-              </motion.button>
-            </motion.div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        {/* Header */}
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+            Dashboard
+          </h2>
+          <p className="text-gray-600">Welcome back, David</p>
+        </div>
 
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-xl p-6 shadow-lg"
-            >
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-600" />
-                Messages
-              </h2>
-              <div className="space-y-3">
-                {[1, 2].map((item) => (
-                  <motion.div
-                    key={item}
-                    whileHover={{ x: 5 }}
-                    className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-100" />
-                      <div>
-                        <h3 className="font-medium">Dr. Johnson</h3>
-                        <p className="text-gray-600 text-sm">
-                          Hi! How can I help...
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+          <StatCard
+            title="Weekly Sessions"
+            value="15"
+            percentage="40"
+            trend="increase"
+            icon={<CalendarIcon className="h-6 w-6 text-purple-600" />}
+          />
+
+          <StatCard
+            title="Active Messages"
+            value="45"
+            percentage="19"
+            trend="decrease"
+            icon={<CalendarIcon className="h-6 w-6 text-purple-600" />}
+          />
+
+          <StatCard
+            title="Online Counselors"
+            value="12"
+            percentage="5"
+            trend="increase"
+            icon={<UserIcon className="h-6 w-6 text-purple-600" />}
+          />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3 md:mb-4">
+              Session Statistics
+            </h3>
+            <div className="h-48 md:h-64 bg-gray-50 rounded-lg"></div>
+          </div>
+
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3 md:mb-4">
+              Traffic Sources
+            </h3>
+            <div className="space-y-3 md:space-y-4">
+              <TrafficSource label="Direct" percentage="60" color="purple" />
+              <TrafficSource label="Referral" percentage="25" color="indigo" />
+              <TrafficSource label="Social" percentage="15" color="pink" />
+            </div>
           </div>
         </div>
-      </motion.div>
+
+        {children}
+      </main>
     </div>
   );
-};
+}
 
-export default CustomerDashboard;
+// StatCard Component
+function StatCard({ title, value, percentage, trend, icon }: any) {
+  return (
+    <motion.div
+      whileHover={{ y: -5 }}
+      className="bg-white p-4 md:p-6 rounded-xl shadow-sm"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-sm">{title}</p>
+          <p className="text-xl md:text-2xl font-bold mt-1 md:mt-2">{value}</p>
+          <div className="flex items-center mt-1 md:mt-2">
+            <span
+              className={`text-sm ${
+                trend === "increase" ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {trend === "increase" ? "↑" : "↓"} {percentage}%
+            </span>
+          </div>
+        </div>
+        <div className="bg-purple-100 p-2 md:p-3 rounded-lg">{icon}</div>
+      </div>
+    </motion.div>
+  );
+}
+
+// TrafficSource Component
+function TrafficSource({ label, percentage, color }: any) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center">
+        <div
+          className={`h-3 w-3 bg-${color}-500 rounded-full mr-2 md:mr-3`}
+        ></div>
+        <span className="text-gray-600 text-sm md:text-base">{label}</span>
+      </div>
+      <span className="font-medium text-sm md:text-base">{percentage}%</span>
+    </div>
+  );
+}
