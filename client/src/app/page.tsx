@@ -73,7 +73,7 @@ const specializations = [
     { number: "24/7", label: "Support Available" },
   ];
 
-const HomePage: React.FC = () => {
+const Home: React.FC = () => {
   const [selectedSpecialization, setSelectedSpecialization] =
     React.useState("All");
 
@@ -625,7 +625,7 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;
+export default Home;
 
 
 
