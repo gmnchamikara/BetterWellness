@@ -1,15 +1,20 @@
 // app/dashboard/layout.tsx
 "use client";
 
-import {
-  Bars3Icon,
-  CalendarIcon,
-  UserIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  Squares2X2Icon,
+  UserIcon,
+  CalendarIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ChevronRightIcon,
+  XMarkIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
 import navigation from "@/utils/navigation";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -70,8 +75,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     >
                       <item.icon className="h-5 w-5 mr-3" />
                       <span className="hidden md:inline">{item.name}</span>
+                      
                     </a>
                   </motion.div>
+
+             
                 </div>
               ))}
             </div>
