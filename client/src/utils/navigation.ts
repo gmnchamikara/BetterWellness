@@ -3,7 +3,7 @@ import {
   UserIcon,
   CalendarIcon,
   ChatBubbleOvalLeftEllipsisIcon,
-  ChartBarIcon,
+  UserGroupIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
@@ -16,7 +16,7 @@ const navigation = [
   {
     name: "Counselors",
     href: "/dashboard/counselors",
-    icon: UserIcon,
+    icon: UserGroupIcon,
   },
   {
     name: "Sessions",
@@ -31,7 +31,7 @@ const navigation = [
   {
     name: "Profile",
     href: "/dashboard/profile",
-    icon: ChartBarIcon,
+    icon: UserIcon,
   },
   {
     name: "Settings",

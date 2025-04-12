@@ -82,11 +82,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-            Dashboard
-          </h2>
-          <p className="text-gray-600">Welcome back, David</p>
+        <div className="mb-6 md:mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+              Dashboard
+            </h2>
+            <p className="text-gray-600">Welcome back, David</p>
+          </div>
+          <a
+            href="/"
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+          >
+            Logout
+          </a>
         </div>
 
         {/* Stats Grid */}
