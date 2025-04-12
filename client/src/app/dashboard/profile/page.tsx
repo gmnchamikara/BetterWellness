@@ -1,15 +1,20 @@
 // app/dashboard/layout.tsx
 "use client";
 
-import {
-  Bars3Icon,
-  CalendarIcon,
-  UserIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { ReactNode, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  Squares2X2Icon,
+  UserIcon,
+  CalendarIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ChevronRightIcon,
+  XMarkIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
 import navigation from "@/utils/navigation";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -70,8 +75,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     >
                       <item.icon className="h-5 w-5 mr-3" />
                       <span className="hidden md:inline">{item.name}</span>
+                   
                     </a>
                   </motion.div>
+
+                
                 </div>
               ))}
             </div>
@@ -82,19 +90,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         {/* Header */}
-        <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-              Dashboard
-            </h2>
-            <p className="text-gray-600">Welcome back, David</p>
-          </div>
-          <a
-            href="/"
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Logout
-          </a>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+            Dashboard
+          </h2>
+          <p className="text-gray-600">Welcome back, David</p>
         </div>
 
         {/* Stats Grid */}
