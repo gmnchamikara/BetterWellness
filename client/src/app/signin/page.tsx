@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { motion } from "framer-motion";
 import {
   LockClosedIcon,
@@ -9,9 +9,53 @@ import {
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signinSchema, SigninSchemaType } from "@/schemas/signinSchema";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "@/redux/user/userSlice";
+import OAuth from "@/components/OAuth";
+
+interface FormData {
+  email?: string;
+  password?: string;
+}
+
 
 const Signin: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [formData, setFormData] = useState<FormData>({});
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.user);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      dispatch(signInStart());
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signInFailure(data));
+        return;
+      }
+      dispatch(signInSuccess(data));
+      router.push("/");
+    } catch (error: any) {
+      dispatch(signInFailure(error));
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
