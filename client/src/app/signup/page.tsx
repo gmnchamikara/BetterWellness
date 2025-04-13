@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 interface FormData {
   username?: string;
@@ -27,7 +27,7 @@ const Signup: React.FC = () => {
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-
+  const [submitError, setSubmitError] = useState("");
   const {
     register,
     handleSubmit,
@@ -41,34 +41,30 @@ const Signup: React.FC = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      setError(false);
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+ const onSubmit = async (data: SignupSchemaType) => {
+   setLoading(true);
+   setSubmitError("");
 
-      const data = await res.json();
-      console.log("------DATA---------", data);
-      setLoading(false);
+   try {
+     const res = await fetch("/api/auth/signup", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(data),
+     });
 
-      if (data.success === false) {
-        setError(true);
-        return;
-      }
+     const result = await res.json();
+     if (!res.ok || result.success === false) {
+       setSubmitError(result.message || "Signup failed.");
+       return;
+     }
 
-      router.push("/sign-in");
-    } catch (error) {
-      setLoading(false);
-      setError(true);
-    }
-  };
+     router.push("/sign-in");
+   } catch (err) {
+     setSubmitError("Network error. Please try again.");
+   } finally {
+     setLoading(false);
+   }
+ };
 
   useEffect(() => {
     setIsMounted(true);
@@ -126,7 +122,7 @@ const Signup: React.FC = () => {
             </p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {[
               {
                 icon: UserCircleIcon,
@@ -163,23 +159,27 @@ const Signup: React.FC = () => {
                 placeholder: "Create a password",
                 id: "password",
               },
-            ].map((field, idx) => (
+            ].map(({ id, label, type, icon: Icon, idx }) => (
               <motion.div
-                key={field.label}
+                key={id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={isMounted ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: idx * 0.1 + 0.2 }}
               >
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {field.label}
+                <label
+                  htmlFor={id}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {label}
                 </label>
                 <div className="relative">
-                  <field.icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
-                    type={field.type}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:text-black"
-                    placeholder={field.placeholder}
-                    onChange={handleChange}
+                    type={type}
+                    id={id}
+                    {...register(id as keyof SignupSchemaType)}
+                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder={`Enter your ${label.toLowerCase()}`}
                   />
                 </div>
               </motion.div>
@@ -258,24 +258,3 @@ const Signup: React.FC = () => {
 };
 
 export default Signup;
-function useForm<T>(arg0: {
-  resolver: Resolver<
-    {
-      email: string;
-      password: string;
-      fname: string;
-      lname: string;
-      phone: string;
-    },
-    unknown,
-    {
-      email: string;
-      password: string;
-      fname: string;
-      lname: string;
-      phone: string;
-    }
-  >;
-}): { register: any; handleSubmit: any; formState: { errors: any } } {
-  throw new Error("Function not implemented.");
-}
