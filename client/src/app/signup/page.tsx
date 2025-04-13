@@ -1,17 +1,64 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+// import OAuth from "@/components/OAuth";
+import { signupSchema, SignupSchemaType } from "@/schemas/signupSchema";
 import {
-  UserCircleIcon,
   EnvelopeIcon,
-  PhoneIcon,
-  LockClosedIcon,
   HeartIcon,
+  LockClosedIcon,
+  PhoneIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+interface FormData {
+  username?: string;
+  email?: string;
+  password?: string;
+}
 
 const Signup: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+  const [submitError, setSubmitError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupSchemaType>({
+    resolver: zodResolver(signupSchema),
+  });
+
+ const onSubmit = async (data: SignupSchemaType) => {
+   console.log("---Form submitted data:", data); 
+   setLoading(true);
+   setSubmitError("");
+
+   try {
+     const res = await fetch("/api/auth/signup", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(data),
+     });
+
+     const result = await res.json();
+     if (!res.ok || result.success === false) {
+       setSubmitError(result.message || "Signup failed.");
+       return;
+     }
+
+     router.push("/signin");
+   } catch (err) {
+     setSubmitError("Network error. Please try again.");
+   } finally {
+     setLoading(false);
+   }
+ };
 
   useEffect(() => {
     setIsMounted(true);
@@ -65,71 +112,97 @@ const Signup: React.FC = () => {
             </motion.div>
             <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
             <p className="mt-2 text-gray-600">
-              Start your wellness journey today
+              Start Your Wellness Journey Today !
             </p>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {[
               {
+                idx: 1,
                 icon: UserCircleIcon,
-                label: "First Name",
+                label: "Full Name",
                 type: "text",
                 placeholder: "Enter your First Name",
+                id: "fullname",
               },
               {
-                icon: UserCircleIcon,
-                label: "Last Name",
-                type: "text",
-                placeholder: "Enter your Last Name",
-              },
-              {
+                idx: 3,
                 icon: EnvelopeIcon,
                 label: "Email",
                 type: "email",
                 placeholder: "Enter your email",
+                id: "email",
               },
               {
+                idx: 4,
                 icon: PhoneIcon,
                 label: "Phone Number",
                 type: "tel",
                 placeholder: "Enter your phone number",
+                id: "phone",
               },
               {
+                idx: 5,
                 icon: LockClosedIcon,
                 label: "Password",
                 type: "password",
                 placeholder: "Create a password",
+                id: "password",
               },
-            ].map((field, idx) => (
+            ].map(({ id, label, type, icon: Icon, idx }) => (
               <motion.div
-                key={field.label}
+                key={id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={isMounted ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: idx * 0.1 + 0.2 }}
               >
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {field.label}
+                <label
+                  htmlFor={id}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {label}
                 </label>
                 <div className="relative">
-                  <field.icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-800" />
                   <input
-                    type={field.type}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:text-black" 
-                    placeholder={field.placeholder}
+                    type={type}
+                    id={id}
+                    {...register(id as keyof SignupSchemaType)}
+                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-1 focus:ring-blue-700 outline-0 focus:border-blue-700 transition-colors text-gray-800"
+                    placeholder={`Enter your ${label.toLowerCase()}`}
                   />
                 </div>
+                {errors[id as keyof SignupSchemaType] && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors[id as keyof SignupSchemaType]?.message}
+                  </p>
+                )}
               </motion.div>
             ))}
 
             <motion.button
+              disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Create Account
+              {loading ? "Loading..." : "Create Account"}
             </motion.button>
 
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex justify-center items-center">
+                <p className="text-red-600">
+                  {submitError && (
+                    <p className="text-red-600 text-sm text-center mt-4">
+                      {submitError}
+                    </p>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* <OAuth /> */}
             <div className="relative mt-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>

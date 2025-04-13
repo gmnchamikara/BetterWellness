@@ -1,15 +1,63 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { signinSchema, SigninSchemaType } from "@/schemas/signinSchema";
 import {
-  LockClosedIcon,
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "@/store/features/users/userSlice";
+import { AppDispatch, RootState } from "@/store/store";
+import {
   EnvelopeIcon,
   HeartIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+
+interface FormData {
+  email?: string;
+  password?: string;
+}
 
 const Signin: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.user);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SigninSchemaType>({
+    resolver: zodResolver(signinSchema),
+  });
+
+  const onSubmit = async (formData: SigninSchemaType) => {
+    console.log("------DATA-----", formData);
+    try {
+      dispatch(signInStart());
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signInFailure(data));
+        return;
+      }
+      dispatch(signInSuccess(data));
+      router.push("/dashboard");
+    } catch (error: any) {
+      dispatch(signInFailure(error));
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -67,7 +115,7 @@ const Signin: React.FC = () => {
             </p>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={isMounted ? { x: 0, opacity: 1 } : {}}
@@ -79,11 +127,17 @@ const Signin: React.FC = () => {
               <div className="relative">
                 <EnvelopeIcon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
+                  {...register("email")}
                   type="email"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-1 focus:ring-blue-700 outline-0 focus:border-blue-700 transition-colors text-gray-800"
                   placeholder="Enter your email"
                 />
               </div>
+              {errors.email && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </motion.div>
 
             <motion.div
@@ -97,11 +151,17 @@ const Signin: React.FC = () => {
               <div className="relative">
                 <LockClosedIcon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
+                  {...register("password")}
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-1 focus:ring-blue-700 outline-0 focus:border-blue-700 transition-colors text-gray-800"
                   placeholder="Enter your password"
                 />
               </div>
+              {errors.password && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </motion.div>
 
             <div className="flex items-center justify-between">
@@ -119,7 +179,7 @@ const Signin: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Sign In
+              {loading ? "Loading..." : "Sign In"}
             </motion.button>
 
             <div className="relative mt-8">

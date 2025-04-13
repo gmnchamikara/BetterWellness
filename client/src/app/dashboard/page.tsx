@@ -11,13 +11,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { ReactNode, useState } from "react";
 import navigation from "@/utils/navigation";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store'; 
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
-
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const { currentUser } = useSelector((state: RootState) => state.user);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
@@ -87,7 +89,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <h2 className="text-xl md:text-2xl font-bold text-gray-800">
               Dashboard
             </h2>
-            <p className="text-gray-600">Welcome back, David</p>
+            <p className="text-gray-600">
+              Welcome back,{" "}
+              {currentUser ? (
+                <>
+                  {currentUser.profilePicture && (
+                    <img
+                      src={currentUser.profilePicture}
+                      alt="profile"
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  )}
+                  <span className="text-sm font-medium">
+                    {currentUser.fullname}
+                  </span>
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </p>
           </div>
           <a
             href="/"
