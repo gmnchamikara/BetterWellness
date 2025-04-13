@@ -1,17 +1,63 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import {
-  UserCircleIcon,
   EnvelopeIcon,
-  PhoneIcon,
-  LockClosedIcon,
   HeartIcon,
+  LockClosedIcon,
+  PhoneIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import OAuth from "../components/OAuth";
+
+
+interface FormData {
+  username?: string;
+  email?: string;
+  password?: string;
+}
 
 const Signup: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [formData, setFormData] = useState<FormData>({});
+  const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError(false);
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.success === false) {
+        setError(true);
+        return;
+      }
+
+      router.push("/sign-in");
+    } catch (error) {
+      setLoading(false);
+      setError(true);
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -115,21 +161,23 @@ const Signup: React.FC = () => {
                   <field.icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type={field.type}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:text-black" 
+                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:text-black"
                     placeholder={field.placeholder}
+                    onChange={handleChange}
                   />
                 </div>
               </motion.div>
             ))}
 
             <motion.button
+              disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Create Account
+              {loading ? "Loading..." : "Create Account"}
             </motion.button>
-
+            <OAuth />
             <div className="relative mt-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
