@@ -1,4 +1,6 @@
 "use client";
+// import OAuth from "@/components/OAuth";
+import { signupSchema, SignupSchemaType } from "@/schemas/signupSchema";
 import {
   EnvelopeIcon,
   HeartIcon,
@@ -6,12 +8,12 @@ import {
   PhoneIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import OAuth from "../components/OAuth";
-
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { Resolver } from "react-hook-form";
 
 interface FormData {
   username?: string;
@@ -25,6 +27,14 @@ const Signup: React.FC = () => {
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupSchemaType>({
+    resolver: zodResolver(signupSchema),
+  });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -45,6 +55,7 @@ const Signup: React.FC = () => {
       });
 
       const data = await res.json();
+      console.log("------DATA---------", data);
       setLoading(false);
 
       if (data.success === false) {
@@ -111,41 +122,46 @@ const Signup: React.FC = () => {
             </motion.div>
             <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
             <p className="mt-2 text-gray-600">
-              Start your wellness journey today
+              Start Your Wellness Journey Today !
             </p>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {[
               {
                 icon: UserCircleIcon,
                 label: "First Name",
                 type: "text",
                 placeholder: "Enter your First Name",
+                id: "fname",
               },
               {
                 icon: UserCircleIcon,
                 label: "Last Name",
                 type: "text",
                 placeholder: "Enter your Last Name",
+                id: "lname",
               },
               {
                 icon: EnvelopeIcon,
                 label: "Email",
                 type: "email",
                 placeholder: "Enter your email",
+                id: "email",
               },
               {
                 icon: PhoneIcon,
                 label: "Phone Number",
                 type: "tel",
                 placeholder: "Enter your phone number",
+                id: "phone",
               },
               {
                 icon: LockClosedIcon,
                 label: "Password",
                 type: "password",
                 placeholder: "Create a password",
+                id: "password",
               },
             ].map((field, idx) => (
               <motion.div
@@ -177,7 +193,16 @@ const Signup: React.FC = () => {
             >
               {loading ? "Loading..." : "Create Account"}
             </motion.button>
-            <OAuth />
+
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex justify-center items-center">
+                <p className="text-red-600">
+                  {error && "Something went wrong!"}
+                </p>
+              </div>
+            </div>
+
+            {/* <OAuth /> */}
             <div className="relative mt-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -233,3 +258,24 @@ const Signup: React.FC = () => {
 };
 
 export default Signup;
+function useForm<T>(arg0: {
+  resolver: Resolver<
+    {
+      email: string;
+      password: string;
+      fname: string;
+      lname: string;
+      phone: string;
+    },
+    unknown,
+    {
+      email: string;
+      password: string;
+      fname: string;
+      lname: string;
+      phone: string;
+    }
+  >;
+}): { register: any; handleSubmit: any; formState: { errors: any } } {
+  throw new Error("Function not implemented.");
+}
