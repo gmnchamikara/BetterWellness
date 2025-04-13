@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface FormData {
@@ -23,8 +23,6 @@ interface FormData {
 
 const Signup: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
-  const [formData, setFormData] = useState<FormData>({});
-  const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const [submitError, setSubmitError] = useState("");
@@ -35,11 +33,6 @@ const Signup: React.FC = () => {
   } = useForm<SignupSchemaType>({
     resolver: zodResolver(signupSchema),
   });
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
 
  const onSubmit = async (data: SignupSchemaType) => {
    setLoading(true);
@@ -127,18 +120,10 @@ const Signup: React.FC = () => {
               {
                 idx: 1,
                 icon: UserCircleIcon,
-                label: "First Name",
+                label: "Full Name",
                 type: "text",
                 placeholder: "Enter your First Name",
-                id: "fname",
-              },
-              {
-                idx: 2,
-                icon: UserCircleIcon,
-                label: "Last Name",
-                type: "text",
-                placeholder: "Enter your Last Name",
-                id: "lname",
+                id: "fullname",
               },
               {
                 idx: 3,
@@ -178,15 +163,20 @@ const Signup: React.FC = () => {
                   {label}
                 </label>
                 <div className="relative">
-                  <Icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Icon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-800" />
                   <input
                     type={type}
                     id={id}
                     {...register(id as keyof SignupSchemaType)}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-1 focus:ring-blue-700 outline-0 focus:border-blue-700 transition-colors text-gray-800"
                     placeholder={`Enter your ${label.toLowerCase()}`}
                   />
                 </div>
+                {errors[id as keyof SignupSchemaType] && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors[id as keyof SignupSchemaType]?.message}
+                  </p>
+                )}
               </motion.div>
             ))}
 
@@ -202,7 +192,11 @@ const Signup: React.FC = () => {
             <div className="relative mb-4">
               <div className="absolute inset-0 flex justify-center items-center">
                 <p className="text-red-600">
-                  {error && "Something went wrong!"}
+                  {submitError && (
+                    <p className="text-red-600 text-sm text-center mt-4">
+                      {submitError}
+                    </p>
+                  )}
                 </p>
               </div>
             </div>
