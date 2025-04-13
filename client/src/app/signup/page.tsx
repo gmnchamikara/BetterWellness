@@ -35,6 +35,7 @@ const Signup: React.FC = () => {
   });
 
  const onSubmit = async (data: SignupSchemaType) => {
+   console.log("---Form submitted data:", data); 
    setLoading(true);
    setSubmitError("");
 
