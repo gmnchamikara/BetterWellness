@@ -125,6 +125,7 @@ const Signup: React.FC = () => {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {[
               {
+                idx: 1,
                 icon: UserCircleIcon,
                 label: "First Name",
                 type: "text",
@@ -132,6 +133,7 @@ const Signup: React.FC = () => {
                 id: "fname",
               },
               {
+                idx: 2,
                 icon: UserCircleIcon,
                 label: "Last Name",
                 type: "text",
@@ -139,6 +141,7 @@ const Signup: React.FC = () => {
                 id: "lname",
               },
               {
+                idx: 3,
                 icon: EnvelopeIcon,
                 label: "Email",
                 type: "email",
@@ -146,6 +149,7 @@ const Signup: React.FC = () => {
                 id: "email",
               },
               {
+                idx: 4,
                 icon: PhoneIcon,
                 label: "Phone Number",
                 type: "tel",
@@ -153,6 +157,7 @@ const Signup: React.FC = () => {
                 id: "phone",
               },
               {
+                idx: 5,
                 icon: LockClosedIcon,
                 label: "Password",
                 type: "password",
