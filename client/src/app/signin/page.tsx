@@ -7,6 +7,8 @@ import {
   HeartIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signinSchema, SigninSchemaType } from "@/schemas/signinSchema";
 
 const Signin: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -80,7 +82,7 @@ const Signin: React.FC = () => {
                 <EnvelopeIcon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-1 focus:ring-blue-700 outline-0 focus:border-blue-700 transition-colors text-gray-800"
                   placeholder="Enter your email"
                 />
               </div>

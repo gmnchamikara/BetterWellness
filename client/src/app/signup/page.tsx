@@ -52,7 +52,7 @@ const Signup: React.FC = () => {
        return;
      }
 
-     router.push("/sign-in");
+     router.push("/signin");
    } catch (err) {
      setSubmitError("Network error. Please try again.");
    } finally {
