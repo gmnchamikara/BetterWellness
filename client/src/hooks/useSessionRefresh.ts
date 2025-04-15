@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import CryptoJS from "crypto-js";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 
 const ENCRYPTION_KEY = "your-secret-key"; // same key as in store.ts
 
@@ -36,16 +37,17 @@ const useSessionRefresh = () => {
 
   useEffect(() => {
     const handleActivity = () => refreshSession();
+    const pathname = usePathname();
 
     document.addEventListener("mousemove", handleActivity);
     document.addEventListener("keydown", handleActivity);
 
-    const unsubscribe = router.events?.subscribe?.(handleActivity); // if router events supported
-
+    useEffect(() => {
+      refreshSession();
+    }, [pathname]);
     return () => {
       document.removeEventListener("mousemove", handleActivity);
       document.removeEventListener("keydown", handleActivity);
-      unsubscribe?.();
     };
   }, [user]);
 };

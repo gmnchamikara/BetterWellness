@@ -1,54 +1,112 @@
 // store.ts
-import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "@/store/features/users/userSlice";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import userReducer, {
+  signOut,
+  UserState,
+} from "@/store/features/users/userSlice";
+import CryptoJS from "crypto-js";
 
-// --- Setup store first without preloadedState ---
-export const store = configureStore({
-  reducer: {
-    user: userReducer,
-  },
-});
+// Define encryption key (should come from .env in production)
+const ENCRYPTION_KEY = "your-secret-key";
 
-// --- Infer types AFTER store creation ---
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+// -- AES Encryption/Decryption Helpers --
+const encryptState = (state: object) => {
+  const serialized = JSON.stringify(state);
+  return CryptoJS.AES.encrypt(serialized, ENCRYPTION_KEY).toString();
+};
 
-// --- Now we can load and save localStorage state ---
-const loadState = (): Partial<RootState> | undefined => {
+const decryptState = (encrypted: string) => {
+  const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
+  const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+  return JSON.parse(decrypted);
+};
+
+// -- Load state from sessionStorage --
+const loadState = (): any => {
   try {
-    const serializedState = localStorage.getItem("reduxState");
-    return serializedState ? JSON.parse(serializedState) : undefined;
+    const encrypted = sessionStorage.getItem("reduxState");
+    if (!encrypted) return undefined;
+
+    const decrypted = decryptState(encrypted);
+    const now = Date.now();
+
+    if (decrypted.expiry && decrypted.expiry > now) {
+      return { user: decrypted.user };
+    } else {
+      sessionStorage.removeItem("reduxState");
+      return undefined;
+    }
   } catch (err) {
-    console.error("Could not load state:", err);
+    console.error("Failed to load state:", err);
     return undefined;
   }
 };
 
-const saveState = (state: RootState) => {
+// -- Save state to sessionStorage with new expiry --
+const saveState = (state: RootState, refreshExpiryOnly = false) => {
   try {
-    const serializedState = JSON.stringify({
+    const expiryTimestamp = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+    const currentUser = state.user.currentUser;
+
+    if (!currentUser) {
+      sessionStorage.removeItem("reduxState");
+      return;
+    }
+
+    const dataToSave = {
       user: {
-        currentUser: state.user.currentUser,
+        currentUser,
         loading: false,
         error: null,
       },
-    });
-    localStorage.setItem("reduxState", serializedState);
+      expiry: expiryTimestamp,
+    };
+
+    const encrypted = encryptState(dataToSave);
+    sessionStorage.setItem("reduxState", encrypted);
   } catch (err) {
-    console.error("Could not save state:", err);
+    console.error("Failed to save state:", err);
   }
 };
 
-// --- Optional: rehydrate user state manually if needed ---
+
+// -- Store Setup --
 const preloadedState = loadState();
-if (preloadedState) {
-  store.dispatch({
-    type: "user/signInSuccess",
-    payload: preloadedState.user?.currentUser,
-  });
+
+const rootReducer = combineReducers({
+  user: userReducer,
+});
+
+export const store = configureStore({
+  reducer: rootReducer,
+  preloadedState,
+});
+
+export type RootState = ReturnType<typeof rootReducer>;
+export type AppDispatch = typeof store.dispatch;
+
+// -- Auto sign-out if no preloaded state --
+if (!preloadedState) {
+  store.dispatch(signOut());
 }
 
-// --- Subscribe to changes ---
+// -- Save to sessionStorage on updates --
 store.subscribe(() => {
   saveState(store.getState());
 });
+
+// 🔄 Refresh session expiry on activity
+let activityTimeout: NodeJS.Timeout | null = null;
+const refreshExpiry = () => {
+  if (activityTimeout) clearTimeout(activityTimeout);
+  activityTimeout = setTimeout(() => {
+    saveState(store.getState()); // refresh expiry
+  }, 1000);
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener("mousemove", refreshExpiry);
+  window.addEventListener("keydown", refreshExpiry);
+  window.addEventListener("click", refreshExpiry);
+  window.addEventListener("scroll", refreshExpiry);
+}
