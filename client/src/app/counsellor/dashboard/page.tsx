@@ -5,7 +5,7 @@ import {
   UserIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
-import Header from "@/components/Header";
+import Header from "@/components/Auth/Header";
 
 const CounsellorDashboard: React.FC = () => {
   return (
