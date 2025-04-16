@@ -1,9 +1,6 @@
 // store.ts
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import userReducer, {
-  signOut,
-  UserState,
-} from "@/store/features/users/userSlice";
+import userReducer, { signOut } from "@/store/features/users/userSlice";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import CryptoJS from "crypto-js";
 
 // Define encryption key (should come from .env in production)
@@ -69,9 +66,9 @@ const saveState = (state: RootState, refreshExpiryOnly = false) => {
   }
 };
 
-
 // -- Store Setup --
-const preloadedState = loadState();
+// const preloadedState = loadState();
+const preloadedState = typeof window !== "undefined" ? loadState() : undefined;
 
 const rootReducer = combineReducers({
   user: userReducer,
@@ -90,23 +87,25 @@ if (!preloadedState) {
   store.dispatch(signOut());
 }
 
-// -- Save to sessionStorage on updates --
-store.subscribe(() => {
-  saveState(store.getState());
-});
-
-// 🔄 Refresh session expiry on activity
-let activityTimeout: NodeJS.Timeout | null = null;
-const refreshExpiry = () => {
-  if (activityTimeout) clearTimeout(activityTimeout);
-  activityTimeout = setTimeout(() => {
-    saveState(store.getState()); // Now always refreshes expiry
-  }, 1000);
-};
-
 if (typeof window !== "undefined") {
-  window.addEventListener("mousemove", refreshExpiry);
-  window.addEventListener("keydown", refreshExpiry);
-  window.addEventListener("click", refreshExpiry);
-  window.addEventListener("scroll", refreshExpiry);
+  // Save on store updates
+  store.subscribe(() => {
+    saveState(store.getState());
+  });
+
+  // Auto-refresh session expiry on activity
+  let activityTimeout: NodeJS.Timeout | null = null;
+  const refreshExpiry = () => {
+    if (activityTimeout) clearTimeout(activityTimeout);
+    activityTimeout = setTimeout(() => {
+      saveState(store.getState());
+    }, 1000);
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("mousemove", refreshExpiry);
+    window.addEventListener("keydown", refreshExpiry);
+    window.addEventListener("click", refreshExpiry);
+    window.addEventListener("scroll", refreshExpiry);
+  }
 }

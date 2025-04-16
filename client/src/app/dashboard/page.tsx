@@ -9,10 +9,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import navigation from "@/utils/navigation";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store'; 
+
+
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -20,6 +22,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const { currentUser } = useSelector((state: RootState) => state.user);
+  const [isClient, setIsClient] = useState(false); // Track if we’re on the client
+  const [screenWidth, setScreenWidth] = useState(0);
+
+  useEffect(() => {
+    setIsClient(true);
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    handleResize(); // set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
@@ -62,7 +74,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     <a
                       href={item.href}
                       onClick={() => {
-                        if (window.innerWidth < 768) setIsSidebarOpen(false);
+                        if (screenWidth < 768) setIsSidebarOpen(false);
                       }}
                       className={`flex items-center p-3 rounded-lg ${
                         pathname === item.href
