@@ -7,7 +7,7 @@ import userReducer, {
 import CryptoJS from "crypto-js";
 
 // Define encryption key (should come from .env in production)
-const ENCRYPTION_KEY = "your-secret-key";
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "Nuwan2025";
 
 // -- AES Encryption/Decryption Helpers --
 const encryptState = (state: object) => {
@@ -100,7 +100,7 @@ let activityTimeout: NodeJS.Timeout | null = null;
 const refreshExpiry = () => {
   if (activityTimeout) clearTimeout(activityTimeout);
   activityTimeout = setTimeout(() => {
-    saveState(store.getState()); // refresh expiry
+    saveState(store.getState()); // Now always refreshes expiry
   }, 1000);
 };
 
