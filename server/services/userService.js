@@ -12,6 +12,7 @@ import { ensureUserTableExists } from "../utils/ensureUsersTable.js";
 const TABLE_NAME = "Users";
 
 // Create User
+// Create User
 export const createUser = async (userData) => {
   await ensureUserTableExists();
 
@@ -25,6 +26,8 @@ export const createUser = async (userData) => {
     profilePicture:
       userData.profilePicture ??
       "https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg",
+    role: userData.role ?? "client", // default role is 'client'
+    disorder: userData.disorder ?? [], // default empty array
     createdAt: now,
     updatedAt: now,
   };
@@ -42,6 +45,7 @@ export const createUser = async (userData) => {
     throw new Error("DynamoDB Error - Create User: " + err.message);
   }
 };
+
 
 // Get User by Email
 export const getUserByEmail = async (email) => {
