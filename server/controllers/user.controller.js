@@ -4,7 +4,7 @@ import {
   getUserByEmail,
   updateUserByEmail,
   deleteUserByEmail,
-} from "../models/user.model.js";
+} from "../services/userService.js";
 
 export const test = (req, res) => {
   res.json({

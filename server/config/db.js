@@ -5,11 +5,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-let ddbDocClient;
+let ddbClient; // Low-level client
+let ddbDocClient; // Document client
 
 const connectDB = async () => {
   try {
-    const client = new DynamoDBClient({
+    ddbClient = new DynamoDBClient({
       region: process.env.AWS_REGION,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -17,11 +18,11 @@ const connectDB = async () => {
       },
     });
 
-    ddbDocClient = DynamoDBDocumentClient.from(client);
+    ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-    // Attempt to resolve credentials
+    // Ensure credentials are loaded
     console.log("🔄 Connecting to AWS DynamoDB...");
-    await client.config.credentials(); // ensures credentials are resolved
+    await ddbClient.config.credentials();
     console.log("✅ DynamoDB Client initialized successfully");
   } catch (error) {
     console.error("❌ DynamoDB connection failed:", error.message);
@@ -30,11 +31,15 @@ const connectDB = async () => {
 };
 
 const getDynamoClient = () => {
-  if (!ddbDocClient) {
-    throw new Error("DynamoDB DocumentClient not initialized. Call connectDB() first.");
+  if (!ddbDocClient || !ddbClient) {
+    throw new Error(
+      "DynamoDB clients not initialized. Call connectDB() first."
+    );
   }
-  return ddbDocClient;
+  return {
+    ddbClient,
+    ddbDocClient,
+  };
 };
 
-export { connectDB, getDynamoClient, ddbDocClient };
-
+export { connectDB, getDynamoClient, ddbClient, ddbDocClient };

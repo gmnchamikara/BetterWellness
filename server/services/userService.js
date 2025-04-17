@@ -7,7 +7,7 @@ import {
   QueryCommand,
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { ensureUserTableExists } from "../utils/ensureTable.js";
+import { ensureUserTableExists } from "../utils/ensureUsersTable.js";
 
 const TABLE_NAME = "Users";
 

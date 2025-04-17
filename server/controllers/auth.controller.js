@@ -1,6 +1,6 @@
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, getUserByEmail } from "../models/user.model.js";
+import { createUser, getUserByEmail } from "../services/userService.js";
 import { errorHandler } from "../utils/error.js";
 
 export const signup = async (req, res, next) => {
