@@ -9,10 +9,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import navigation from "@/utils/navigation";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store'; 
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+
+
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -20,6 +23,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const { currentUser } = useSelector((state: RootState) => state.user);
+  const [isClient, setIsClient] = useState(false); // Track if we’re on the client
+  const [screenWidth, setScreenWidth] = useState(0);
+
+  useEffect(() => {
+    setIsClient(true);
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    handleResize(); // set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
@@ -40,7 +53,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Navigation Sidebar */}
       <AnimatePresence>
-        {(isSidebarOpen || window.innerWidth >= 768) && (
+        {isClient && (isSidebarOpen || screenWidth >= 768) && (
           <motion.nav
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
@@ -62,7 +75,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     <a
                       href={item.href}
                       onClick={() => {
-                        if (window.innerWidth < 768) setIsSidebarOpen(false);
+                        if (screenWidth < 768) setIsSidebarOpen(false);
                       }}
                       className={`flex items-center p-3 rounded-lg ${
                         pathname === item.href
@@ -84,15 +97,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         {/* Header */}
-        <div className="mb-6 md:mb-8 flex items-center justify-between">
+        {/* <div className="mb-6 md:mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl md:text-2xl font-bold text-gray-800">
               Dashboard
             </h2>
-            <p className="text-gray-600">
-              Welcome back,{" "}
+            <div className="mt-1 flex items-center gap-2 text-gray-600">
+              <span>Welcome back,</span>
               {currentUser ? (
-                <>
+                <div className="flex items-center gap-2">
                   {currentUser.profilePicture && (
                     <img
                       src={currentUser.profilePicture}
@@ -100,22 +113,26 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       className="h-7 w-7 rounded-full object-cover"
                     />
                   )}
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium text-gray-800">
                     {currentUser.fullname}
                   </span>
-                </>
+                </div>
               ) : (
-                "Sign In"
+                <span className="text-sm font-medium text-red-500">
+                  Sign In
+                </span>
               )}
-            </p>
+            </div>
           </div>
+
           <a
             href="/"
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+            className="self-start md:self-auto bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition-colors duration-200"
           >
             Logout
           </a>
-        </div>
+        </div> */}
+        <DashboardHeader currentUser={currentUser} />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">

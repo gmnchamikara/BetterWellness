@@ -84,3 +84,5 @@ export const {
 } = userSlice.actions;
 
 export default userSlice.reducer;
+
+export type { UserState }; 
