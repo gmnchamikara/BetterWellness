@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-betterwellness-dev-1aaea-authRole",
+      "UnauthRoleArn": "arn:aws:iam::346785473509:role/amplify-betterwellness-dev-1aaea-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::346785473509:role/amplify-betterwellness-dev-1aaea-authRole",
+      "Region": "ap-south-1",
+      "DeploymentBucketName": "amplify-betterwellness-dev-1aaea-deployment",
+      "UnauthRoleName": "amplify-betterwellness-dev-1aaea-unauthRole",
+      "StackName": "amplify-betterwellness-dev-1aaea",
+      "StackId": "arn:aws:cloudformation:ap-south-1:346785473509:stack/amplify-betterwellness-dev-1aaea/cec56ed0-1c8c-11f0-b21e-0ab0668d6ff9",
+      "AmplifyAppId": "dt4428zpkag6j"
+    },
+    "categories": {
+      "auth": {
+        "betterwellness71216bf0": {}
+      }
+    }
+  }
+}
