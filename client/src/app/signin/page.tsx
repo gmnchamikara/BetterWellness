@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+// import Auth from "@aws-amplify/auth";
+import { configureAmplify } from "./amplifyConfig";
 
 interface FormData {
   email?: string;
@@ -30,6 +32,11 @@ const Signin: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.user);
 
+
+  useEffect(() => {
+    configureAmplify();
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -38,26 +45,39 @@ const Signin: React.FC = () => {
     resolver: zodResolver(signinSchema),
   });
 
-  const onSubmit = async (formData: SigninSchemaType) => {
-    console.log("------DATA-----", formData);
-    try {
-      dispatch(signInStart());
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.success === false) {
-        dispatch(signInFailure(data));
-        return;
-      }
-      dispatch(signInSuccess(data));
-      router.push("/dashboard");
-    } catch (error: any) {
-      dispatch(signInFailure(error));
-    }
-  };
+  // const onSubmit = async (formData: SigninSchemaType) => {
+  //   console.log("------DATA-----", formData);
+  //   try {
+  //     dispatch(signInStart());
+  //     const res = await fetch("/api/auth/signin", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(formData),
+  //     });
+  //     const data = await res.json();
+  //     if (data.success === false) {
+  //       dispatch(signInFailure(data));
+  //       return;
+  //     }
+  //     dispatch(signInSuccess(data));
+  //     router.push("/dashboard");
+  //   } catch (error: any) {
+  //     dispatch(signInFailure(error));
+  //   }
+  // };
+
+  // const onSubmit = async (formData: SigninSchemaType) => {
+  //   dispatch(signInStart());
+  //   try {
+  //     const user = await Auth.signIn(formData.email, formData.password);
+  //     dispatch(signInSuccess(user));
+  //     router.push("/dashboard");
+  //   } catch (error: any) {
+  //     console.error("Cognito Sign In Error:", error);
+  //     dispatch(signInFailure(error));
+  //   }
+  // };
+
 
   useEffect(() => {
     setIsMounted(true);
