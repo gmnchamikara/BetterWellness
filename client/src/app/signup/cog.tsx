@@ -1,5 +1,7 @@
 "use client";
-// import OAuth from "@/components/OAuth";
+
+import React, { useEffect } from "react";
+import { Amplify } from "aws-amplify";
 import {
   Authenticator,
   Heading,
@@ -9,12 +11,7 @@ import {
   View,
 } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { HeartIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import { Amplify } from "aws-amplify";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 // Configure Amplify
 Amplify.configure({
@@ -142,7 +139,6 @@ const formFields = {
   },
 };
 
-
 // ➡️ New Inner component that will use `useAuthenticator` safely
 const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthenticator((context) => [context.user]);
@@ -161,7 +157,6 @@ const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Auth = ({ children }: { children: React.ReactNode }) => {
-  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const isAuthPage = pathname.match(/^\/(signin|signup)$/);
   const isDashboardPage =
@@ -171,70 +166,15 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>;
   }
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Animated Header */}
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="bg-white shadow-sm sticky top-0 z-50"
+    <div className="h-full">
+      <Authenticator
+        initialState={pathname.includes("signup") ? "signUp" : "signIn"}
+        components={components}
+        formFields={formFields}
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <HeartIcon className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
-                BetterWellness
-              </span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-600">Already have an account?</span>
-              <Link
-                href="/signin"
-                className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
-              >
-                Sign In
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </motion.header>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={isMounted ? { opacity: 1, y: 0 } : {}}
-        className="flex-grow flex items-center justify-center p-4"
-      >
-        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={isMounted ? { scale: 1 } : {}}
-              className="mx-auto mb-4"
-            >
-              <UserCircleIcon className="h-12 w-12 text-blue-600" />
-            </motion.div>
-            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-            <p className="mt-2 text-gray-600">
-              Start Your Wellness Journey Today !
-            </p>
-            <Authenticator
-              initialState={pathname.includes("signup") ? "signUp" : "signIn"}
-              components={components}
-              formFields={formFields}
-            >
-              {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
-            </Authenticator>
-          </div>
-        </div>
-      </motion.div>
+        {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
+      </Authenticator>
     </div>
   );
 };
