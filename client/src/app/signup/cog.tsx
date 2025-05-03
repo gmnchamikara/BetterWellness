@@ -1,5 +1,7 @@
 "use client";
 
+import React, { useEffect } from "react";
+import { Amplify } from "aws-amplify";
 import {
   Authenticator,
   Heading,
@@ -9,12 +11,7 @@ import {
   View,
 } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { HeartIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import { Amplify } from "aws-amplify";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 // Configure Amplify
 Amplify.configure({
@@ -31,21 +28,15 @@ Amplify.configure({
 const components = {
   Header() {
     return (
-      <View className="mt-4 mb-6 text-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="flex justify-center mb-4"
-        >
-          <UserCircleIcon className="h-14 w-14 text-blue-600" />
-        </motion.div>
-        <Heading level={3} className="!text-3xl !font-bold text-gray-900">
-          Better
-          <span className="text-blue-600 font-light">Wellness</span>
+      <View className="mt-4 mb-7">
+        <Heading level={3} className="!text-2xl !font-bold">
+          RENT
+          <span className="text-secondary-500 font-light hover:!text-primary-300">
+            IFUL
+          </span>
         </Heading>
-        <p className="text-gray-500 mt-2">
-          Start your <span className="font-semibold">wellness journey </span>
-          today!
+        <p className="text-muted-foreground mt-2">
+          <span className="font-bold">Welcome!</span> Please sign in to continue
         </p>
       </View>
     );
@@ -55,13 +46,13 @@ const components = {
       const { toSignUp } = useAuthenticator();
       return (
         <View className="text-center mt-4">
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Don&apos;t have an account?{" "}
             <button
               onClick={toSignUp}
-              className="text-blue-600 hover:underline bg-transparent border-none p-0 focus:outline-none"
+              className="text-primary hover:underline bg-transparent border-none p-0"
             >
-              Sign up
+              Sign up here
             </button>
           </p>
         </View>
@@ -81,8 +72,8 @@ const components = {
             hasError={!!validationErrors?.["custom:role"]}
             isRequired
           >
-            <Radio value="client">Client</Radio>
-            <Radio value="counsellor">Counsellor</Radio>
+            <Radio value="tenant">Tenant</Radio>
+            <Radio value="manager">Manager</Radio>
           </RadioGroupField>
         </>
       );
@@ -91,11 +82,11 @@ const components = {
       const { toSignIn } = useAuthenticator();
       return (
         <View className="text-center mt-4">
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Already have an account?{" "}
             <button
               onClick={toSignIn}
-              className="text-blue-600 hover:underline bg-transparent border-none p-0 focus:outline-none"
+              className="text-primary hover:underline bg-transparent border-none p-0"
             >
               Sign in
             </button>
@@ -148,6 +139,7 @@ const formFields = {
   },
 };
 
+// ➡️ New Inner component that will use `useAuthenticator` safely
 const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
@@ -165,74 +157,24 @@ const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Auth = ({ children }: { children: React.ReactNode }) => {
-  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const isAuthPage = pathname.match(/^\/(signin|signup)$/);
   const isDashboardPage =
     pathname.startsWith("/manager") || pathname.startsWith("/tenants");
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   if (!isAuthPage && !isDashboardPage) {
     return <>{children}</>;
   }
 
-  if (!isMounted) return null;
-
-  const isSignUp = pathname.includes("signup");
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -80 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="bg-white shadow-md sticky top-0 z-50"
+    <div className="h-full">
+      <Authenticator
+        initialState={pathname.includes("signup") ? "signUp" : "signIn"}
+        components={components}
+        formFields={formFields}
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <HeartIcon className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">
-                BetterWellness
-              </span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-600 hidden sm:inline">
-                Already have an account?
-              </span>
-              <Link
-                href="/signin"
-                className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none"
-              >
-                Sign In
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </motion.header>
-
-      {/* Main Content */}
-      {/* Main Content */}
-      <motion.main
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex-grow flex flex-col items-center justify-center p-6"
-      >
-        {/* Authenticator OUTSIDE the card */}
-        <div className="w-full max-w-md">
-          <Authenticator
-            initialState={isSignUp ? "signUp" : "signIn"}
-            components={components}
-            formFields={formFields}
-          >
-            {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
-          </Authenticator>
-        </div>
-      </motion.main>
+        {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
+      </Authenticator>
     </div>
   );
 };

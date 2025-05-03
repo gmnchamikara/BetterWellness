@@ -289,7 +289,7 @@ const Home: React.FC = () => {
       </main>
       <div className="min-h-screen flex flex-col">
         {/* Animated Header */}
-        <motion.header
+        {/* <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
@@ -341,7 +341,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           </nav>
-        </motion.header>
+        </motion.header> */}
 
         {/* Hero Section with Staggered Animations */}
         <main className="flex-grow">
