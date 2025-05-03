@@ -1,5 +1,5 @@
 "use client";
-// import OAuth from "@/components/OAuth";
+
 import {
   Authenticator,
   Heading,
@@ -31,15 +31,21 @@ Amplify.configure({
 const components = {
   Header() {
     return (
-      <View className="mt-4 mb-7">
-        <Heading level={3} className="!text-2xl !font-bold">
-          RENT
-          <span className="text-secondary-500 font-light hover:!text-primary-300">
-            IFUL
-          </span>
+      <View className="mt-4 mb-6 text-center">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="flex justify-center mb-4"
+        >
+          <UserCircleIcon className="h-14 w-14 text-blue-600" />
+        </motion.div>
+        <Heading level={3} className="!text-3xl !font-bold text-gray-900">
+          Better
+          <span className="text-blue-600 font-light">Wellness</span>
         </Heading>
-        <p className="text-muted-foreground mt-2">
-          <span className="font-bold">Welcome!</span> Please sign in to continue
+        <p className="text-gray-500 mt-2">
+          Start your <span className="font-semibold">wellness journey </span>
+          today!
         </p>
       </View>
     );
@@ -49,13 +55,13 @@ const components = {
       const { toSignUp } = useAuthenticator();
       return (
         <View className="text-center mt-4">
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             Don&apos;t have an account?{" "}
             <button
               onClick={toSignUp}
-              className="text-primary hover:underline bg-transparent border-none p-0"
+              className="text-blue-600 hover:underline bg-transparent border-none p-0 focus:outline-none"
             >
-              Sign up here
+              Sign up
             </button>
           </p>
         </View>
@@ -75,8 +81,8 @@ const components = {
             hasError={!!validationErrors?.["custom:role"]}
             isRequired
           >
-            <Radio value="tenant">Tenant</Radio>
-            <Radio value="manager">Manager</Radio>
+            <Radio value="client">Client</Radio>
+            <Radio value="counsellor">Counsellor</Radio>
           </RadioGroupField>
         </>
       );
@@ -85,11 +91,11 @@ const components = {
       const { toSignIn } = useAuthenticator();
       return (
         <View className="text-center mt-4">
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             Already have an account?{" "}
             <button
               onClick={toSignIn}
-              className="text-primary hover:underline bg-transparent border-none p-0"
+              className="text-blue-600 hover:underline bg-transparent border-none p-0 focus:outline-none"
             >
               Sign in
             </button>
@@ -142,8 +148,6 @@ const formFields = {
   },
 };
 
-
-// ➡️ New Inner component that will use `useAuthenticator` safely
 const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
@@ -167,38 +171,42 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
   const isDashboardPage =
     pathname.startsWith("/manager") || pathname.startsWith("/tenants");
 
-  if (!isAuthPage && !isDashboardPage) {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  if (!isAuthPage && !isDashboardPage) {
+    return <>{children}</>;
+  }
+
   if (!isMounted) return null;
+
+  const isSignUp = pathname.includes("signup");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Animated Header */}
+      {/* Header */}
       <motion.header
-        initial={{ y: -100 }}
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
-        className="bg-white shadow-sm sticky top-0 z-50"
+        className="bg-white shadow-md sticky top-0 z-50"
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex-shrink-0 flex items-center">
+            <Link href="/" className="flex items-center space-x-2">
               <HeartIcon className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900">
                 BetterWellness
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600">Already have an account?</span>
+              <span className="text-gray-600 hidden sm:inline">
+                Already have an account?
+              </span>
               <Link
                 href="/signin"
-                className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
+                className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none"
               >
                 Sign In
               </Link>
@@ -207,34 +215,24 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
         </nav>
       </motion.header>
 
-      <motion.div
+      {/* Main Content */}
+      {/* Main Content */}
+      <motion.main
         initial={{ opacity: 0, y: 20 }}
-        animate={isMounted ? { opacity: 1, y: 0 } : {}}
-        className="flex-grow flex items-center justify-center p-4"
+        animate={{ opacity: 1, y: 0 }}
+        className="flex-grow flex flex-col items-center justify-center p-6"
       >
-        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={isMounted ? { scale: 1 } : {}}
-              className="mx-auto mb-4"
-            >
-              <UserCircleIcon className="h-12 w-12 text-blue-600" />
-            </motion.div>
-            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-            <p className="mt-2 text-gray-600">
-              Start Your Wellness Journey Today !
-            </p>
-            <Authenticator
-              initialState={pathname.includes("signup") ? "signUp" : "signIn"}
-              components={components}
-              formFields={formFields}
-            >
-              {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
-            </Authenticator>
-          </div>
+        {/* Authenticator OUTSIDE the card */}
+        <div className="w-full max-w-md">
+          <Authenticator
+            initialState={isSignUp ? "signUp" : "signIn"}
+            components={components}
+            formFields={formFields}
+          >
+            {() => <AuthenticatedRoute>{children}</AuthenticatedRoute>}
+          </Authenticator>
         </div>
-      </motion.div>
+      </motion.main>
     </div>
   );
 };
